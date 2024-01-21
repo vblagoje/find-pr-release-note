@@ -1,0 +1,26 @@
+name: pr-release-note-finder
+description: Automates identification and handling of a single Reno release note in PRs
+inputs:
+  base-branch:
+    description: 'The base branch to compare changes against'
+    required: true
+    default: 'main'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - run: |
+        # Fetch the full history for comparison
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ inputs.base-branch }}:refs/remotes/origin/${{ inputs.base-branch }}
+
+        # Identify the single changed Reno note file
+        FILE=$(git diff --name-only origin/${{ inputs.base-branch }}...HEAD -- releasenotes/notes/*.yaml)
+        NOTE_NAME=$(echo $FILE | sed -e 's/releasenotes\/notes\/\(.*\)-.*\.yaml/\1/')
+
+        # Output the note name
+        echo "::set-output name=note_name::$NOTE_NAME"
+      shell: bash
