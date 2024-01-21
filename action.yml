@@ -1,10 +1,18 @@
-name: pr-release-note-finder
+name: find-pr-release-note
 description: Automates identification and handling of a single Reno release note in PRs
 inputs:
   base-branch:
     description: 'The base branch to compare changes against'
     required: true
     default: 'main'
+
+outputs:
+  note-name:
+    description: 'The name of the release note file on the PR branch or an empty string if none exists'
+    value: ${{ steps.find-note.outputs.note-name }}
+  note-name-without-hash:
+    description: 'The name of the release note file on the PR branch without the hash or an empty string if none exists'
+    value: ${{ steps.find-note.outputs.note-name-without-hash }}
 
 runs:
   using: 'composite'
@@ -18,9 +26,11 @@ runs:
         git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ inputs.base-branch }}:refs/remotes/origin/${{ inputs.base-branch }}
 
         # Identify the single changed Reno note file
-        FILE=$(git diff --name-only origin/${{ inputs.base-branch }}...HEAD -- releasenotes/notes/*.yaml)
+        FILE=$(git diff --name-only origin/${{ inputs.base-branch }}...HEAD -- releasenotes/notes/*.yaml)        
         NOTE_NAME=$(echo $FILE | sed -e 's/releasenotes\/notes\/\(.*\)-.*\.yaml/\1/')
 
-        # Output the note name
-        echo "::set-output name=note_name::$NOTE_NAME"
+        # Output values
+        echo "note-name=$FILE" >> "$GITHUB_OUTPUT"
+        echo "note-name-without-hash=$NOTE_NAME" >> "$GITHUB_OUTPUT"
       shell: bash
+      id: find-note
