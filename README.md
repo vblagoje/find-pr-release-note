@@ -24,7 +24,7 @@ name: Handle Release Note in PR
 on: [pull_request]
 
 jobs:
-  handle-release-note:
+  find-release-note:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,10 +39,10 @@ jobs:
       # Additional steps can use the output from find-pr-release-note
 ```
 
-In this example, the action identifies a single changed Reno release note file in the pull request and handles it accordingly.
+In this example, the action identifies changed Reno release note file in the pull request.
 
 ## Output
-- `note_name`: The name of the identified single release note.
+- `note-name`: The name of the identified release note.
 
 ## Contributing
 Contributions to `find-pr-release-note` are encouraged and appreciated!
